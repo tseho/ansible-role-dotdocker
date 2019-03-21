@@ -1,0 +1,47 @@
+---
+- name: Retrieve user id
+  shell: id -u
+  register: dotdocker_user_info
+  changed_when: false
+
+- name: Set user ID
+  set_fact:
+    dotdocker_user_id: "{{ dotdocker_user_info.stdout }}"
+  when: dotdocker_user_id is undefined
+
+- name: Set project path
+  set_fact:
+    dotdocker_project_path: "{{ playbook_dir }}/.."
+  when: dotdocker_project_path is undefined
+
+- name: Set dotdocker path
+  set_fact:
+    dotdocker_path: "{{ playbook_dir }}/../.docker"
+  when: dotdocker_path is undefined
+
+- name: Set projects name
+  set_fact:
+    dotdocker_project_name: "{{ dotdocker_project_path | realpath | basename }}"
+  when: dotdocker_project_name is undefined
+
+- name: Set virtual host
+  set_fact:
+    dotdocker_virtual_host: "{{ project_name }}.localhost"
+  when: dotdocker_virtual_host is undefined
+
+- include_tasks: setup-MacOSX.yml
+  when: ansible_distribution == 'MacOSX'
+
+- include_tasks: setup-Debian.yml
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Ensures docker images are up to date
+  shell: docker-compose build
+  args:
+    chdir: "{{ dotdocker_path }}"
+
+- name: Ensures docker compose is running
+  shell: docker-compose up -d
+  args:
+    chdir: "{{ dotdocker_path }}"
+  when: dotdocker_autostart

@@ -1,0 +1,3 @@
+---
+dotdocker_autostart: yes
+dotdocker_docker_sync_enabled: yes

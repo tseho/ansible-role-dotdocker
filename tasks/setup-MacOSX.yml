@@ -1,0 +1,48 @@
+---
+- name: Set docker-compose.override.yml template path
+  set_fact:
+    dotdocker_compose_override_template: "{{ dotdocker_path }}/.templates/docker-compose.override.osx.yml.j2"
+  when: dotdocker_compose_override_template is undefined
+
+- name: Create docker-compose.override.yml file
+  template:
+    src: "{{ dotdocker_compose_override_template }}"
+    dest: "{{ dotdocker_path }}/docker-compose.override.yml"
+    force: true
+    mode: 0644
+
+- name: Set docker-sync.yml template path
+  set_fact:
+    dotdocker_docker_sync_template: "{{ dotdocker_path }}/.templates/docker-sync.yml.j2"
+  when: dotdocker_docker_sync_template is undefined and dotdocker_docker_sync_enabled
+
+- name: Create docker-sync.yml file
+  template:
+    src: "{{ dotdocker_docker_sync_template }}"
+    dest: "{{ dotdocker_path }}/docker-sync.yml"
+    force: true
+    mode: 0644
+  when: dotdocker_docker_sync_enabled
+
+- name: Set list of .env variables
+  set_fact:
+    dotdocker_env:
+      COMPOSE_PROJECT_NAME: "{{ dotdocker_project_name }}"
+  when: dotdocker_env is undefined
+
+- name: Configure .env
+  lineinfile:
+    path: "{{ dotdocker_path }}/.env"
+    regexp: '^{{ item.key }}='
+    line: '{{item.key}}={{item.value}}'
+    create: yes
+    mode: 0644
+  loop: "{{ lookup('dict', dotdocker_env|default({}), wantlist=True) }}"
+
+- name: Ensures docker sync is running
+  shell: |
+    docker-sync start
+  args:
+    chdir: "{{ dotdocker_path }}"
+  ignore_errors: yes
+  when: dotdocker_docker_sync_enabled and dotdocker_autostart

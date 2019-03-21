@@ -21,7 +21,7 @@
   lineinfile:
     path: "{{ dotdocker_path }}/.env"
     regexp: '^{{ item.key }}='
-    line: '{{item.key}}={{item.value}}'
+    line: '{{ item.key }}={{ item.value }}'
     create: yes
     mode: 0644
   loop: "{{ lookup('dict', dotdocker_env|default({}), wantlist=True) }}"

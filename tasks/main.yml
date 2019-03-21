@@ -1,6 +1,6 @@
 ---
 - name: Retrieve user id
-  shell: id -u
+  command: id -u
   register: dotdocker_user_info
   changed_when: false
 
@@ -36,12 +36,12 @@
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Ensures docker images are up to date
-  shell: docker-compose build
+  command: docker-compose build
   args:
     chdir: "{{ dotdocker_path }}"
 
 - name: Ensures docker compose is running
-  shell: docker-compose up -d
+  command: docker-compose up -d
   args:
     chdir: "{{ dotdocker_path }}"
   when: dotdocker_autostart

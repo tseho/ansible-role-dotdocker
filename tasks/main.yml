@@ -26,7 +26,7 @@
 
 - name: Set virtual host
   set_fact:
-    dotdocker_virtual_host: "{{ project_name }}.localhost"
+    dotdocker_virtual_host: "{{ dotdocker_project_name }}.localhost"
   when: dotdocker_virtual_host is undefined
 
 - include_tasks: setup-MacOSX.yml
